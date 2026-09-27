@@ -252,8 +252,20 @@ def style_e():
     return page("".join(b), "Style E - monde des bonbons - 4-7 ans")
 
 
+def style_f():
+    """Elegant, feminine, more realistic: unicorn portrait with roses and butterflies (ages 4-8)."""
+    import girly
+    return page("".join(girly.page_f()))
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    if os.environ.get("ONLY") == "F":
+        svg = style_f()
+        cairosvg.svg2png(bytestring=svg.encode(), write_to=os.path.join(OUT, "style-F.png"), output_width=1700)
+        with open(os.path.join(OUT, "style-F.pdf"), "wb") as fh:
+            fh.write(cairosvg.svg2pdf(bytestring=svg.encode()))
+        return
     pages = [("A", style_a()), ("B", style_b()), ("C", style_c()), ("D", style_d()), ("E", style_e())]
     w = PdfWriter()
     for k, svg in pages:
