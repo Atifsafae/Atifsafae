@@ -1,3 +1,25 @@
+# Mon Super Coloriage Licorne (NOUVEAU livre - 60 dessins, 4-8 ans)
+
+Fichiers dans `output/livre-licorne/` :
+
+| Fichier | À quoi il sert |
+|---|---|
+| `interieur-KDP.pdf` | Intérieur à envoyer sur Amazon KDP : 124 pages, 21,6 x 27,9 cm (8,5 x 11 in), sans fond perdu. 60 dessins imprimés d'un seul côté. |
+| `couverture-KDP.pdf` | Couverture complète (dos + tranche + face) : 17,529 x 11,25 in, tranche 0,279 in, papier blanc. |
+| `livre-sans-pages-blanches.pdf` | Les 63 pages sans les dos blancs : pour imprimer chez soi, Etsy, Canva. |
+| `couverture-avant.png`, `apercu-*.png` | Images pour ta fiche produit et tes réseaux. |
+
+12 thèmes x 5 dessins : arc-en-ciel, château, anniversaire, forêt de champignons, papillons, roses,
+nuit étoilée, mer, hiver, bonbons, goûter de princesse, fées.
+
+Reconstruire : `cd book2 && python3 build.py` (changer `AUTHOR` en haut de `book2/build.py`).
+Si le nombre de pages change, utiliser la nouvelle `couverture-KDP.pdf` (la tranche est recalculée).
+
+Réglages KDP : français, encre noire / papier blanc, 8,5 x 11 in, sans fond perdu, couverture mate,
+âge de lecture 4-8 ans. Prix conseillé : 7,99 - 9,99 EUR. Déclarer le contenu comme généré par IA.
+
+---
+
 # Unicorn Coloring Book (For Kids Ages 4-8): ready to publish
 
 An original unicorn coloring book with 40 single-sided designs. It is print-ready for
