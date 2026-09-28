@@ -1,3 +1,6 @@
 output/images/
 output/*.zip
 __pycache__/
+kdp-final/source.pdf
+kdp-final/src/
+gemini/pages-extraites/
