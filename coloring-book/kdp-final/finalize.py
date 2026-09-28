@@ -61,6 +61,39 @@ def whiten(im):
     return im.point(lambda v: 255 if v > 215 else v)
 
 
+def remove_dotted_frames(im, band=170):
+    """Erase the dotted frame lines: small ink dots near the page edges that sit in a row
+    with other dots (isolated details of the drawing are kept)."""
+    from scipy import ndimage
+    a = np.array(im)
+    ink = a < 160
+    lab, n = ndimage.label(ink, structure=np.ones((3, 3)))
+    objs = ndimage.find_objects(lab)
+    h, w = a.shape
+    cands = []
+    for i, sl in enumerate(objs, 1):
+        dy, dx = sl[0].stop - sl[0].start, sl[1].stop - sl[1].start
+        if max(dy, dx) > 24:
+            continue
+        cy, cx = (sl[0].start + sl[0].stop) / 2, (sl[1].start + sl[1].stop) / 2
+        if min(cx, cy, w - cx, h - cy) < band:
+            cands.append((i, cx, cy, sl))
+    if not cands:
+        return im
+    pts = np.array([(c[1], c[2]) for c in cands])
+    for i, cx, cy, sl in cands:
+        d = np.hypot(pts[:, 0] - cx, pts[:, 1] - cy)
+        if ((d > 4) & (d < 40)).sum() >= 2:
+            region = a[sl]
+            region[lab[sl] == i] = 255
+            # soften the grey anti-aliasing halo left around the dot
+            y0, y1 = max(0, sl[0].start - 2), sl[0].stop + 2
+            x0, x1 = max(0, sl[1].start - 2), sl[1].stop + 2
+            box = a[y0:y1, x0:x1]
+            box[box > 120] = 255
+    return Image.fromarray(a)
+
+
 def text_image(text, height, max_w, stroke=0, squeeze=.78):
     """Render bold, slightly condensed capitals (like the original banner lettering)."""
     size = int(height * 1.35)
@@ -299,7 +332,7 @@ def fixed_pages():
     pages = load_pages()
     out = []
     for n in range(3, 16):
-        im = whiten(pages[n - 1])
+        im = remove_dotted_frames(whiten(pages[n - 1]))
         if n == 15:
             im = birthday_page(im)
         im = replace_banner(im, BANNERS[n])
@@ -354,7 +387,7 @@ def title_page(c):
     c.setFont("DVB", 18)
     c.drawCentredString(W / 2, 4.05 * inch, "THIS BOOK BELONGS TO:")
     c.setLineWidth(1.2)
-    c.setDash(2, 4)
+    c.setLineWidth(1.2)
     c.line(2.1 * inch, 3.25 * inch, 6.4 * inch, 3.25 * inch)
     c.setDash()
     c.setFont("DV", 12)
@@ -383,10 +416,6 @@ def copyright_page(c):
 
 def certificate_page(c):
     W = TRIM
-    c.setLineWidth(2.5)
-    c.setDash(1, 6)
-    c.roundRect(0.5 * inch, 0.5 * inch, W - inch, W - inch, 22)
-    c.setDash()
     c.setLineWidth(3.5)
     c.roundRect(0.7 * inch, 0.7 * inch, W - 1.4 * inch, W - 1.4 * inch, 16)
     c.setLineWidth(1.8)
@@ -398,12 +427,12 @@ def certificate_page(c):
     c.setFont("DV", 16)
     c.drawCentredString(W / 2, 4.85 * inch, "This magical coloring book was completed by:")
     c.setLineWidth(1.3)
-    c.setDash(2, 4)
+    c.setLineWidth(1.2)
     c.line(1.9 * inch, 4.05 * inch, 6.6 * inch, 4.05 * inch)
     c.setDash()
     c.setFont("DV", 14)
     c.drawString(2.4 * inch, 3.25 * inch, "Date:")
-    c.setDash(2, 4)
+    c.setLineWidth(1.2)
     c.line(3.05 * inch, 3.22 * inch, 6.1 * inch, 3.22 * inch)
     c.setDash()
     c.setLineWidth(1.8)
