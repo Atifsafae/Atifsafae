@@ -1,0 +1,327 @@
+<title>Planning ménage de la maison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout : un tableau de la semaine (tâches × jours) puis une fiche par personne, comme un planning aimanté sur le frigo. */
+:root {
+  --bg: #f3f6f5;
+  --surface: #ffffff;
+  --fg: #1b2624;
+  --muted: #5b6b68;
+  --line: #d6e0de;
+  --accent: #1f6f63;
+  --today: #e3f1ee;
+  --p-hoyam: #c2416b;   --p-hoyam-bg: #fbe6ee;
+  --p-safae: #7046c2;   --p-safae-bg: #eee7fb;
+  --p-frere: #1f63b8;   --p-frere-bg: #e2edfa;
+  --p-khalil: #1d7f4e;  --p-khalil-bg: #e0f3e8;
+  --p-abdou: #a85a06;   --p-abdou-bg: #fbecd9;
+  --p-tous: #3e4b49;    --p-tous-bg: #e6ebea;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121918; --surface: #1a2321; --fg: #e6eeec; --muted: #9db0ac; --line: #2c3a37;
+    --accent: #5cc4b2; --today: #1f302d;
+    --p-hoyam: #f08cab;  --p-hoyam-bg: #3a2029;
+    --p-safae: #b9a0f0;  --p-safae-bg: #2c2340;
+    --p-frere: #8cb8f0;  --p-frere-bg: #1d2a3d;
+    --p-khalil: #7fd3a6; --p-khalil-bg: #1b3326;
+    --p-abdou: #f0b46a;  --p-abdou-bg: #3a2a16;
+    --p-tous: #c3cfcc;   --p-tous-bg: #26302e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121918; --surface: #1a2321; --fg: #e6eeec; --muted: #9db0ac; --line: #2c3a37;
+  --accent: #5cc4b2; --today: #1f302d;
+  --p-hoyam: #f08cab;  --p-hoyam-bg: #3a2029;
+  --p-safae: #b9a0f0;  --p-safae-bg: #2c2340;
+  --p-frere: #8cb8f0;  --p-frere-bg: #1d2a3d;
+  --p-khalil: #7fd3a6; --p-khalil-bg: #1b3326;
+  --p-abdou: #f0b46a;  --p-abdou-bg: #3a2a16;
+  --p-tous: #c3cfcc;   --p-tous-bg: #26302e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 56px; display: grid; gap: 36px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 5vw, 44px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+h2 { font-size: 22px; font-weight: 800; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 64ch; margin-top: 10px; }
+header { display: grid; gap: 18px; }
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); font-weight: 700; }
+
+/* Filtres */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--fg);
+  border-radius: 999px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 8px;
+}
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="true"] { border-color: var(--c); background: var(--cbg); }
+.chip:focus-visible, .cell input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Tableau */
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.hint { color: var(--muted); font-size: 13px; }
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 860px; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; text-align: left; }
+thead th { font-family: var(--font-display); font-size: 15px; font-weight: 600; background: var(--surface); position: sticky; top: 0; }
+thead th.is-today { background: var(--today); color: var(--accent); }
+thead th small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 12px; color: var(--muted); }
+tbody th { width: 170px; font-weight: 700; font-size: 14px; }
+tbody th small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+td.is-today { background: var(--today); }
+tbody tr:last-child > * { border-bottom: 0; }
+.cell {
+  display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 8px;
+  background: var(--cbg); color: var(--c); font-weight: 700; font-size: 13px; cursor: pointer;
+  border: 1.5px solid transparent; transition: opacity .15s;
+}
+.cell + .cell { margin-top: 4px; }
+.cell input { accent-color: var(--c); margin: 0; flex: none; }
+.cell.fixed { border-style: dashed; border-color: var(--c); }
+.cell.done span { text-decoration: line-through; opacity: .65; }
+.empty { color: var(--line); font-size: 13px; padding: 5px 8px; }
+body.filtering .cell:not(.match) { opacity: .2; }
+@media (prefers-reduced-motion: reduce) { .cell { transition: none; } }
+
+/* Fiches personnes */
+.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card.dim { opacity: .35; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card-head h3 { color: var(--c); }
+.load { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.role { font-size: 13px; color: var(--muted); }
+.card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.card li { display: grid; grid-template-columns: 38px 1fr; gap: 8px; font-size: 14px; }
+.card li b { color: var(--muted); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding-top: 2px; }
+.bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--c); border-radius: 3px; }
+
+/* Détail des tâches + règles */
+.two { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 28px; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+dl.tasks { margin: 0; display: grid; gap: 12px; }
+dl.tasks div { display: grid; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+dl.tasks div:last-child { border-bottom: 0; }
+dl.tasks dt { font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
+dl.tasks dt span { font-weight: 400; color: var(--muted); font-size: 13px; white-space: nowrap; }
+dl.tasks dd { margin: 0; color: var(--muted); font-size: 14px; }
+ol.rules { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+ol.rules li::marker { font-family: var(--font-display); font-weight: 800; color: var(--accent); }
+.note { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 14px; color: var(--muted); display: grid; gap: 8px; }
+.note strong { color: var(--fg); }
+button.reset { font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">Maison · semaine type</p>
+      <h1>Planning ménage de la maison</h1>
+      <p class="lede">Qui fait quoi chaque jour dans les espaces communs, réparti selon les horaires de chacun. Touche un prénom pour ne voir que ses tâches, et coche une case quand c’est fait.</p>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filtrer par personne"></div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>La semaine</h2>
+      <p class="hint">Bordure en pointillés : jour déjà fixé. <button class="reset" id="reset" type="button">Décocher toute la semaine</button></p>
+    </div>
+    <div class="table-scroll">
+      <table id="grid"></table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Fiche de chacun</h2>
+      <p class="hint">Temps estimé par semaine, hors rangement de ses propres affaires</p>
+    </div>
+    <div class="people" id="people"></div>
+  </section>
+
+  <section class="two">
+    <div>
+      <div class="section-head"><h2>Ce que veut dire chaque tâche</h2></div>
+      <dl class="tasks" id="tasks"></dl>
+    </div>
+    <div style="display:grid; gap:18px; align-content:start;">
+      <div class="section-head" style="margin:0"><h2>Les règles</h2></div>
+      <ol class="rules">
+        <li><strong>Qui cuisine ne fait pas la vaisselle.</strong> Le nettoyage de la cuisine revient toujours à quelqu’un d’autre ce soir-là.</li>
+        <li><strong>Échanger, c’est permis</strong> si on prévient la veille et qu’on rend le service dans la semaine.</li>
+        <li><strong>Chacun range ses affaires</strong> et met son linge sale dans le panier. Le linge plié est déposé en piles, chacun range la sienne.</li>
+        <li><strong>Dimanche 18 h, 15 minutes tous ensemble</strong> pour remettre la maison en ordre avant la semaine.</li>
+        <li><strong>Chaque mois, on tourne.</strong> Safae et le grand frère échangent leurs colonnes, Khalil et Abdou aussi. Les dîners du mercredi (Khalil) et du samedi (Abdou) ne bougent pas.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Pourquoi cette répartition ?</strong></p>
+        <p>Hoyam travaille de 9 h à 18 h : elle n’a rien en semaine, seulement le week-end. Safae est à la maison en journée, elle prend le linge et l’aspirateur. Le grand frère en télétravail fait ses tâches à la pause de midi ou après 18 h. Khalil et Abdou ont des tâches courtes après le collège, plus la chambre à tour de rôle.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// Change le prénom ici pour le grand frère.
+const PEOPLE = {
+  hoyam:  { name: "Hoyam",       role: "Maman · travaille 9 h – 18 h" },
+  safae:  { name: "Safae",       role: "20 ans · étudiante à la maison" },
+  frere:  { name: "Grand frère", role: "23 ans · télétravail" },
+  khalil: { name: "Khalil",      role: "15 ans · collège" },
+  abdou:  { name: "Abdou",       role: "14 ans · collège" },
+  tous:   { name: "Tous",        role: "" }
+};
+
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+// minutes = estimation pour le calcul de charge
+const TASKS = [
+  { id: "diner",   label: "Cuisiner le dîner",   when: "à partir de 18 h 30", minutes: 45,
+    desc: "Préparer le repas du soir pour toute la famille, en prévoyant si possible des restes pour le midi du lendemain." },
+  { id: "cuisine", label: "Nettoyer la cuisine", when: "après le dîner", minutes: 25,
+    desc: "Vaisselle ou lave-vaisselle, plans de travail, plaques, table, coup de balai et poubelle sortie si elle est pleine." },
+  { id: "aspi",    label: "Aspirateur",          when: "salon, couloir, cuisine", minutes: 25,
+    desc: "Salon, couloir, entrée et cuisine. Ranger ce qui traîne par terre avant de passer l’aspirateur." },
+  { id: "sdb",     label: "Salle de bains",      when: "2 fois par semaine", minutes: 30,
+    desc: "Lavabo, miroir, douche ou baignoire, robinets et sol. Le samedi, changer aussi les serviettes." },
+  { id: "wc",      label: "Toilettes",           when: "4 fois par semaine", minutes: 10,
+    desc: "Cuvette, lunette, chasse d’eau et sol. Vérifier qu’il reste du papier toilette." },
+  { id: "etend",   label: "Linge : étendoir",    when: "en journée", minutes: 20,
+    desc: "Lancer une machine, étendre le linge sur l’étendoir, puis ramasser le linge sec de la fois précédente." },
+  { id: "tri",     label: "Linge : tri et pliage", when: "le soir", minutes: 20,
+    desc: "Trier le linge sale (blanc, couleurs, foncé) pour les prochaines machines, plier le linge sec et faire une pile par personne." },
+  { id: "range",   label: "Rangement commun",    when: "10 minutes", minutes: 10,
+    desc: "Salon, entrée, table basse, chaussures et manteaux. Chaque objet retourne à sa place." },
+  { id: "chambre", label: "Chambre Khalil & Abdou", when: "un jour sur deux", minutes: 15,
+    desc: "Lit fait, bureau dégagé, vêtements rangés ou au panier, sol libre. À tour de rôle, et à deux le dimanche." }
+];
+
+// PLAN[tâche][jour] = liste de personnes. "fixed" marque les jours déjà décidés.
+const PLAN = {
+  diner:   ["safae", "frere", "khalil*", "safae", "frere", "abdou*", "hoyam"],
+  cuisine: ["khalil", "abdou", "safae", "frere", "khalil", "hoyam", "abdou"],
+  aspi:    ["frere", "", "abdou", "", "safae", "khalil", ""],
+  sdb:     ["", "safae", "", "", "", "frere", ""],
+  wc:      ["abdou", "", "frere", "khalil", "", "safae", ""],
+  etend:   ["safae", "", "frere", "", "safae", "", "frere"],
+  tri:     ["", "khalil", "", "abdou", "", "hoyam", ""],
+  range:   ["abdou", "khalil", "abdou", "khalil", "frere", "safae", "tous"],
+  chambre: ["khalil", "abdou", "khalil", "abdou", "khalil", "abdou", "khalil+abdou"]
+};
+
+function slots(task, day) {
+  const raw = PLAN[task][day];
+  if (!raw) return [];
+  return raw.split("+").map(p => ({ who: p.replace("*", ""), fixed: p.endsWith("*") }));
+}
+
+// Semaine ISO pour que les cases cochées repartent à zéro chaque lundi.
+function weekKey(d = new Date()) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y = t.getUTCFullYear();
+  const w = Math.ceil(((t - Date.UTC(y, 0, 1)) / 86400000 + 1) / 7);
+  return `menage-${y}-S${w}`;
+}
+const KEY = weekKey();
+const todayIdx = (new Date().getDay() + 6) % 7;
+
+function load(k, fallback) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+let done = load(KEY, {});
+let filter = load("menage-filtre", null);
+
+function colorVars(who) { return `--c: var(--p-${who}); --cbg: var(--p-${who}-bg);`; }
+
+function renderGrid() {
+  const head = `<thead><tr><th scope="col">Tâche</th>${DAYS.map((d, i) =>
+    `<th scope="col" class="${i === todayIdx ? "is-today" : ""}">${d}${i === todayIdx ? "<small>aujourd’hui</small>" : ""}</th>`).join("")}</tr></thead>`;
+  const rows = TASKS.map(t => `<tr><th scope="row">${t.label}<small>${t.when}</small></th>${DAYS.map((_, i) => {
+    const s = slots(t.id, i);
+    const inner = s.length ? s.map(({ who, fixed }) => {
+      const id = `${t.id}-${i}-${who}`;
+      const checked = done[id] ? "checked" : "";
+      return `<label class="cell ${fixed ? "fixed" : ""} ${done[id] ? "done" : ""}" data-who="${who}" style="${colorVars(who)}">
+        <input type="checkbox" id="${id}" ${checked}><span>${PEOPLE[who].name}</span></label>`;
+    }).join("") : `<div class="empty">—</div>`;
+    return `<td class="${i === todayIdx ? "is-today" : ""}">${inner}</td>`;
+  }).join("")}</tr>`).join("");
+  document.getElementById("grid").innerHTML = head + `<tbody>${rows}</tbody>`;
+}
+
+function perPerson() {
+  const out = {};
+  for (const k of Object.keys(PEOPLE)) out[k] = { items: [], minutes: 0 };
+  TASKS.forEach(t => DAYS.forEach((d, i) => slots(t.id, i).forEach(({ who }) => {
+    out[who].items.push({ day: i, label: t.label });
+    if (t.id !== "chambre") out[who].minutes += t.minutes;
+  })));
+  return out;
+}
+
+function fmt(min) { const h = Math.floor(min / 60), m = min % 60; return h ? `${h} h ${String(m).padStart(2, "0")}` : `${m} min`; }
+
+function renderPeople() {
+  const data = perPerson();
+  const max = Math.max(...Object.values(data).map(d => d.minutes));
+  document.getElementById("people").innerHTML = Object.entries(PEOPLE).filter(([k]) => k !== "tous").map(([k, p]) => {
+    const d = data[k];
+    d.items.sort((a, b) => a.day - b.day);
+    return `<article class="card" data-who="${k}" style="${colorVars(k)}">
+      <div class="card-head"><h3>${p.name}</h3><span class="load">≈ ${fmt(d.minutes)} / sem.</span></div>
+      <p class="role">${p.role}</p>
+      <div class="bar" aria-hidden="true"><i style="width:${Math.round(d.minutes / max * 100)}%"></i></div>
+      <ul>${d.items.map(it => `<li><b>${DAYS[it.day].slice(0, 3)}</b><span>${it.label}</span></li>`).join("")}</ul>
+    </article>`;
+  }).join("");
+}
+
+function renderChips() {
+  const chips = Object.entries(PEOPLE).filter(([k]) => k !== "tous").map(([k, p]) =>
+    `<button class="chip" type="button" data-who="${k}" aria-pressed="${filter === k}" style="${colorVars(k)}"><span class="dot"></span>${p.name}</button>`);
+  document.getElementById("chips").innerHTML =
+    `<button class="chip" type="button" data-who="" aria-pressed="${!filter}" style="--c: var(--accent); --cbg: var(--today);">Tout le monde</button>` + chips.join("");
+}
+
+function applyFilter() {
+  document.body.classList.toggle("filtering", !!filter);
+  document.querySelectorAll(".cell").forEach(c => c.classList.toggle("match", c.dataset.who === filter));
+  document.querySelectorAll(".card").forEach(c => c.classList.toggle("dim", !!filter && c.dataset.who !== filter));
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String((c.dataset.who || null) === filter)));
+}
+
+function renderTasks() {
+  document.getElementById("tasks").innerHTML = TASKS.map(t =>
+    `<div><dt>${t.label}<span>≈ ${t.minutes} min</span></dt><dd>${t.desc}</dd></div>`).join("");
+}
+
+document.getElementById("chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  filter = b.dataset.who || null; save("menage-filtre", filter); applyFilter();
+});
+document.getElementById("grid").addEventListener("change", e => {
+  const box = e.target; if (box.type !== "checkbox") return;
+  if (box.checked) done[box.id] = true; else delete done[box.id];
+  box.closest(".cell").classList.toggle("done", box.checked);
+  save(KEY, done);
+});
+document.getElementById("reset").addEventListener("click", () => {
+  done = {}; save(KEY, done); renderGrid(); applyFilter();
+});
+
+renderChips(); renderGrid(); renderPeople(); renderTasks(); applyFilter();
+</script>
