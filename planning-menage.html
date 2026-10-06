@@ -14,7 +14,7 @@
   --today: #e3f1ee;
   --p-hoyam: #c2416b;   --p-hoyam-bg: #fbe6ee;
   --p-safae: #7046c2;   --p-safae-bg: #eee7fb;
-  --p-frere: #1f63b8;   --p-frere-bg: #e2edfa;
+  --p-othmane: #1f63b8;   --p-othmane-bg: #e2edfa;
   --p-khalil: #1d7f4e;  --p-khalil-bg: #e0f3e8;
   --p-abdou: #a85a06;   --p-abdou-bg: #fbecd9;
   --p-tous: #3e4b49;    --p-tous-bg: #e6ebea;
@@ -27,7 +27,7 @@
     --accent: #5cc4b2; --today: #1f302d;
     --p-hoyam: #f08cab;  --p-hoyam-bg: #3a2029;
     --p-safae: #b9a0f0;  --p-safae-bg: #2c2340;
-    --p-frere: #8cb8f0;  --p-frere-bg: #1d2a3d;
+    --p-othmane: #8cb8f0;  --p-othmane-bg: #1d2a3d;
     --p-khalil: #7fd3a6; --p-khalil-bg: #1b3326;
     --p-abdou: #f0b46a;  --p-abdou-bg: #3a2a16;
     --p-tous: #c3cfcc;   --p-tous-bg: #26302e;
@@ -39,7 +39,7 @@
   --accent: #5cc4b2; --today: #1f302d;
   --p-hoyam: #f08cab;  --p-hoyam-bg: #3a2029;
   --p-safae: #b9a0f0;  --p-safae-bg: #2c2340;
-  --p-frere: #8cb8f0;  --p-frere-bg: #1d2a3d;
+  --p-othmane: #8cb8f0;  --p-othmane-bg: #1d2a3d;
   --p-khalil: #7fd3a6; --p-khalil-bg: #1b3326;
   --p-abdou: #f0b46a;  --p-abdou-bg: #3a2a16;
   --p-tous: #c3cfcc;   --p-tous-bg: #26302e;
@@ -147,7 +147,7 @@ button.reset { font: inherit; font-size: 13px; color: var(--accent); background:
   <section>
     <div class="section-head">
       <h2>Fiche de chacun</h2>
-      <p class="hint">Temps estimé par semaine, hors rangement de ses propres affaires</p>
+      <p class="hint">Temps estimé par semaine</p>
     </div>
     <div class="people" id="people"></div>
   </section>
@@ -160,26 +160,25 @@ button.reset { font: inherit; font-size: 13px; color: var(--accent); background:
     <div style="display:grid; gap:18px; align-content:start;">
       <div class="section-head" style="margin:0"><h2>Les règles</h2></div>
       <ol class="rules">
-        <li><strong>Qui cuisine ne fait pas la vaisselle.</strong> Le nettoyage de la cuisine revient toujours à quelqu’un d’autre ce soir-là.</li>
+        <li><strong>Qui cuisine ne nettoie pas, et inversement.</strong> En semaine, quand Safae cuisine, Othmane nettoie la cuisine, et l’inverse. Le mercredi c’est Khalil qui nettoie, le samedi Abdou.</li>
         <li><strong>Échanger, c’est permis</strong> si on prévient la veille et qu’on rend le service dans la semaine.</li>
         <li><strong>Chacun range ses affaires</strong> et met son linge sale dans le panier. Le linge plié est déposé en piles, chacun range la sienne.</li>
         <li><strong>Dimanche 18 h, 15 minutes tous ensemble</strong> pour remettre la maison en ordre avant la semaine.</li>
-        <li><strong>Chaque mois, on tourne.</strong> Safae et le grand frère échangent leurs colonnes, Khalil et Abdou aussi. Les dîners du mercredi (Khalil) et du samedi (Abdou) ne bougent pas.</li>
+        <li><strong>Chaque mois, Khalil et Abdou échangent leurs autres tâches</strong> (aspirateur, salle de bains, toilettes…). Le nettoyage de la cuisine du mercredi (Khalil) et du samedi (Abdou) ne bouge pas.</li>
       </ol>
       <div class="note">
         <p><strong>Pourquoi cette répartition ?</strong></p>
-        <p>Hoyam travaille de 9 h à 18 h : elle n’a rien en semaine, seulement le week-end. Safae est à la maison en journée, elle prend le linge et l’aspirateur. Le grand frère en télétravail fait ses tâches à la pause de midi ou après 18 h. Khalil et Abdou ont des tâches courtes après le collège, plus la chambre à tour de rôle.</p>
+        <p>Hoyam travaille de 9 h à 18 h : elle n’a rien en semaine et cuisine le week-end. Safae et Othmane se partagent les dîners et le nettoyage de la cuisine en semaine, plus l’étendoir. Khalil et Abdou prennent le ménage (aspirateur, salle de bains, toilettes, rangement) avec des tâches courtes après le collège, et leur chambre deux fois par semaine.</p>
       </div>
     </div>
   </section>
 </div>
 
 <script>
-// Change le prénom ici pour le grand frère.
 const PEOPLE = {
   hoyam:  { name: "Hoyam",       role: "Maman · travaille 9 h – 18 h" },
   safae:  { name: "Safae",       role: "20 ans · étudiante à la maison" },
-  frere:  { name: "Grand frère", role: "23 ans · télétravail" },
+  othmane: { name: "Othmane",     role: "23 ans · télétravail" },
   khalil: { name: "Khalil",      role: "15 ans · collège" },
   abdou:  { name: "Abdou",       role: "14 ans · collège" },
   tous:   { name: "Tous",        role: "" }
@@ -189,9 +188,9 @@ const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dima
 
 // minutes = estimation pour le calcul de charge
 const TASKS = [
-  { id: "diner",   label: "Cuisiner le dîner",   when: "à partir de 18 h 30", minutes: 45,
-    desc: "Préparer le repas du soir pour toute la famille, en prévoyant si possible des restes pour le midi du lendemain." },
-  { id: "cuisine", label: "Nettoyer la cuisine", when: "après le dîner", minutes: 25,
+  { id: "diner",   label: "Cuisiner le dîner",   when: "Safae / Othmane, maman le week-end", minutes: 45,
+    desc: "Préparer le repas du soir pour toute la famille. En semaine, Safae et Othmane alternent (Safae le lundi, Othmane le mardi, et ainsi de suite). Le week-end, c’est maman." },
+  { id: "cuisine", label: "Nettoyer la cuisine", when: "celui qui ne cuisine pas", minutes: 25,
     desc: "Vaisselle ou lave-vaisselle, plans de travail, plaques, table, coup de balai et poubelle sortie si elle est pleine." },
   { id: "aspi",    label: "Aspirateur",          when: "salon, couloir, cuisine", minutes: 25,
     desc: "Salon, couloir, entrée et cuisine. Ranger ce qui traîne par terre avant de passer l’aspirateur." },
@@ -205,21 +204,21 @@ const TASKS = [
     desc: "Trier le linge sale (blanc, couleurs, foncé) pour les prochaines machines, plier le linge sec et faire une pile par personne." },
   { id: "range",   label: "Rangement commun",    when: "10 minutes", minutes: 10,
     desc: "Salon, entrée, table basse, chaussures et manteaux. Chaque objet retourne à sa place." },
-  { id: "chambre", label: "Chambre Khalil & Abdou", when: "un jour sur deux", minutes: 15,
-    desc: "Lit fait, bureau dégagé, vêtements rangés ou au panier, sol libre. À tour de rôle, et à deux le dimanche." }
+  { id: "chambre", label: "Chambre Khalil & Abdou", when: "2 fois par semaine", minutes: 15,
+    desc: "Lit fait, bureau dégagé, vêtements rangés ou au panier, sol libre. À tour de rôle : Khalil le mardi, Abdou le vendredi." }
 ];
 
 // PLAN[tâche][jour] = liste de personnes. "fixed" marque les jours déjà décidés.
 const PLAN = {
-  diner:   ["safae", "frere", "khalil*", "safae", "frere", "abdou*", "hoyam"],
-  cuisine: ["khalil", "abdou", "safae", "frere", "khalil", "hoyam", "abdou"],
-  aspi:    ["frere", "", "abdou", "", "safae", "khalil", ""],
-  sdb:     ["", "safae", "", "", "", "frere", ""],
-  wc:      ["abdou", "", "frere", "khalil", "", "safae", ""],
-  etend:   ["safae", "", "frere", "", "safae", "", "frere"],
-  tri:     ["", "khalil", "", "abdou", "", "hoyam", ""],
-  range:   ["abdou", "khalil", "abdou", "khalil", "frere", "safae", "tous"],
-  chambre: ["khalil", "abdou", "khalil", "abdou", "khalil", "abdou", "khalil+abdou"]
+  diner:   ["safae", "othmane", "safae", "othmane", "safae", "hoyam", "hoyam"],
+  cuisine: ["othmane", "safae", "khalil*", "safae", "othmane", "abdou*", "othmane"],
+  aspi:    ["abdou", "", "khalil", "", "abdou", "khalil", ""],
+  sdb:     ["", "abdou", "", "", "", "khalil", ""],
+  wc:      ["khalil", "", "abdou", "abdou", "", "khalil", ""],
+  etend:   ["safae", "", "othmane", "", "othmane", "", "safae"],
+  tri:     ["", "othmane", "", "khalil", "", "abdou", ""],
+  range:   ["khalil", "abdou", "khalil", "abdou", "khalil", "abdou", "tous"],
+  chambre: ["", "khalil", "", "", "abdou", "", ""]
 };
 
 function slots(task, day) {
@@ -268,7 +267,7 @@ function perPerson() {
   for (const k of Object.keys(PEOPLE)) out[k] = { items: [], minutes: 0 };
   TASKS.forEach(t => DAYS.forEach((d, i) => slots(t.id, i).forEach(({ who }) => {
     out[who].items.push({ day: i, label: t.label });
-    if (t.id !== "chambre") out[who].minutes += t.minutes;
+    out[who].minutes += t.minutes;
   })));
   return out;
 }
